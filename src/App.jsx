@@ -4,29 +4,84 @@ import { ACCESS_KEY } from "./config/constants";
 
 const App = () => {
   const [imageList, setImageList] = useState([]);
-
+  const [tempImageList, setTempImageList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
+  
     axios
       .get(
         `https://api.unsplash.com/photos/?client_id=${ACCESS_KEY}&per_page=30`
       )
-
-      .then((response) => setImageList(response.data));
+      .then((response) => {
+        setImageList(response.data);
+        setTempImageList(response.data);
+        setIsLoading(false);
+      });
   }, []);
 
+  const searchImage = (query) => {
+    if (query === "") {
+      setImageList(tempImageList);
+    } else {
+      const filteredImageList = imageList.filter((image) => {
+        image.alt_description =
+          image.alt_description === null ? "Images" : image.alt_description;
+
+        return image.alt_description.includes(query);
+      });
+
+      setImageList(filteredImageList);
+    }
+  };
   return (
-    <div>
-      <div>
-        {imageList.map((image) => {
-          // console.log(image.urls.regular);
-          return;
-          <div>
-            <img src={image.urls.regular} />
-            
-          </div>;
-        })}
+    <div> 
+       <h4>Developed By: Milan Bhandari</h4>
+      <center>
+        <input
+          type="text"
+          style={{ height: "40px", width: "50%", borderRadius: "6px" }}
+          placeholder="Search Images.."
+          onChange={(e) => searchImage(e.target.value)}
+        />
+      </center>
+      {/* //image container */}
+
+      <div
+        style={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}
+      >
+        {imageList.length > 0
+          ? imageList.map((image) => {
+              return (
+                <div
+                  key={image.id}
+                  style={{ padding: "20px", textAlign: "center" }}
+                >
+                  <img
+                    src={image.urls.regular}
+                    style={{
+                      height: "250px",
+                      width: "250px",
+                      objectFit: "cover",
+                      border:"solid",
+                      borderRadius:"10px"
+              
+                    }}
+                    alt={image.alt_description}
+                  />
+                  <br />
+                  {image.alt_description
+                    ? image.alt_description.substring(0, 20)
+                    : "react"}
+                </div>
+              );
+            })
+          : isLoading
+          ? "Loading..."
+          : "No images Found!!"}
+          
       </div>
     </div>
+   
   );
 };
 
